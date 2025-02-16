@@ -1,3 +1,4 @@
+using JetBrains.Rider.Unity.Editor;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -10,7 +11,10 @@ namespace Unity.VRTemplate
     /// </summary>
     public class StepManager : MonoBehaviour
     {
-        [SerializeField] GameObject menuObject;
+        [SerializeField] GameObject ResultScreen;
+        [SerializeField] TMP_Text ResultTime;
+
+        GameObject currentLevel;
 
         [Serializable]
         class Step
@@ -20,6 +24,9 @@ namespace Unity.VRTemplate
 
             [SerializeField]
             public GameObject Scene;
+
+            [SerializeField]
+            public bool HideMenu;
         }
         [SerializeField]
         List<Step> m_StepList = new List<Step>();
@@ -43,14 +50,25 @@ namespace Unity.VRTemplate
 
         public void Play()
         {
-            GameObject o = Instantiate(m_StepList[m_CurrentStepIndex].Scene);
-            o.GetComponent<LevelObject>().OnLevelCompleted += ShowMenu;
+            
+            currentLevel = Instantiate(m_StepList[m_CurrentStepIndex].Scene);
+            currentLevel.GetComponent<LevelObject>().OnLevelCompleted += ShowMenu;
 
+            if (m_StepList[m_CurrentStepIndex].HideMenu)
+            {
+                transform.parent.gameObject.SetActive(false);
+            }
         }
-
-        void ShowMenu(object sender, EventArgs e)
+        public void Show()
         {
-            menuObject.SetActive(true);
+            ShowMenu(this, 0);
+        }
+        void ShowMenu(object sender, float totalSeconds)
+        {
+            if (currentLevel) Destroy(currentLevel);
+            ResultScreen.SetActive(true);
+            TimeSpan time = TimeSpan.FromSeconds(totalSeconds);
+            ResultTime.text = time.ToString("mm':'ss");
         }
     }
 }
