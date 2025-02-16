@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class SnapToMesh : MonoBehaviour
@@ -13,11 +14,14 @@ public class SnapToMesh : MonoBehaviour
     [Header("Settings")]
     [SerializeField] float SnappingRange;
     [SerializeField] bool InstantSnap;
+    public bool Locked;
+
+    public UnityEvent OnSnapObject;
 
     Mesh mesh;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void OnEnable()
     {
         GetComponent<Renderer>().material = DefaultMaterial;
         mesh = GetComponent<MeshFilter>().sharedMesh;
@@ -26,29 +30,32 @@ public class SnapToMesh : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        GetComponent<Renderer>().material = DefaultMaterial;
-        Collider[] Colliders = Physics.OverlapSphere(transform.position, SnappingRange);
-        for (int i = 0; i < Colliders.Length; i++)
+        if (!Locked)
         {
-            Collider col = Colliders[i];
-            if (col.CompareTag("Snapable"))
+            GetComponent<Renderer>().material = DefaultMaterial;
+            Collider[] Colliders = Physics.OverlapSphere(transform.position, SnappingRange);
+            for (int i = 0; i < Colliders.Length; i++)
             {
-                GetComponent<Renderer>().material = CloseMaterial;
-                if (col.GetComponent<MeshFilter>().mesh = mesh)
+                Collider col = Colliders[i];
+                if (col.CompareTag("Snapable"))
                 {
                     col.TryGetComponent(out XRGrabInteractable xr);
-                    if (InstantSnap)
+                    GetComponent<Renderer>().material = CloseMaterial;
+                    if (InstantSnap && col.GetComponent<MeshFilter>().sharedMesh == mesh)
                     {
                         Destroy(col.GetComponent<XRGrabInteractable>());
-                        Destroy(col.GetComponent<Rigidbody>());
-                        col.transform.position = transform.position;
-                        col.transform.rotation = transform.rotation;
                         col.transform.SetParent(transform, false);
+                        Destroy(col.GetComponent<Rigidbody>());
+                        col.transform.localPosition = Vector3.zero;
+                        col.transform.localRotation = Quaternion.identity;
                         GetComponent<Renderer>().enabled = false;
+                        Locked = true;
+                        OnSnapObject.Invoke();
                     }
                 }
             }
         }
+        
     }
 
     private void OnDrawGizmos()

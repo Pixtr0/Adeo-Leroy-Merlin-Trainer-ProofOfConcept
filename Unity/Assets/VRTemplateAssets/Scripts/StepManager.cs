@@ -10,11 +10,16 @@ namespace Unity.VRTemplate
     /// </summary>
     public class StepManager : MonoBehaviour
     {
+        [SerializeField] GameObject menuObject;
+
         [Serializable]
         class Step
         {
             [SerializeField]
             public GameObject stepObject;
+
+            [SerializeField]
+            public GameObject Scene;
         }
         [SerializeField]
         List<Step> m_StepList = new List<Step>();
@@ -34,6 +39,18 @@ namespace Unity.VRTemplate
             m_CurrentStepIndex--;
             if(m_CurrentStepIndex < 0) m_CurrentStepIndex = m_StepList.Count - 1;
             m_StepList[m_CurrentStepIndex].stepObject.SetActive(true);
+        }
+
+        public void Play()
+        {
+            GameObject o = Instantiate(m_StepList[m_CurrentStepIndex].Scene);
+            o.GetComponent<LevelObject>().OnLevelCompleted += ShowMenu;
+
+        }
+
+        void ShowMenu(object sender, EventArgs e)
+        {
+            menuObject.SetActive(true);
         }
     }
 }
