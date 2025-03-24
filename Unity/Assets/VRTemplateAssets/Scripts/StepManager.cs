@@ -50,7 +50,8 @@ namespace Unity.VRTemplate
 
         public void Play()
         {
-            
+
+            if (currentLevel) Destroy(currentLevel);
             currentLevel = Instantiate(m_StepList[m_CurrentStepIndex].Scene);
             currentLevel.GetComponent<LevelObject>().OnLevelCompleted += ShowMenu;
 
@@ -65,7 +66,6 @@ namespace Unity.VRTemplate
         }
         void ShowMenu(object sender, float totalSeconds)
         {
-            if (currentLevel) Destroy(currentLevel);
             ResultScreen.SetActive(true);
             TimeSpan time = TimeSpan.FromSeconds(totalSeconds);
             ResultTime.text = time.ToString("mm':'ss");

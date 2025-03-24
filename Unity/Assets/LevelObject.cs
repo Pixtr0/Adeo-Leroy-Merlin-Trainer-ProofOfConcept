@@ -6,6 +6,7 @@ public class LevelObject : MonoBehaviour
     public EventHandler<float> OnLevelCompleted;
     public float timer = 0;
     public float completionDelay;
+    public bool completed;
     bool runTimer;
 
     private void Start()
@@ -23,6 +24,7 @@ public class LevelObject : MonoBehaviour
             if(completionDelay <= 0)
             {
                 OnLevelCompleted.Invoke(this, timer);
+                completed = true;
             }
         }
     }
